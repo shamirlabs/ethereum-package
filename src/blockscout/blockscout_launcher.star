@@ -80,6 +80,7 @@ def get_config_verif():
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_USED_PORTS,
+        public_ports=VERIF_USED_PORTS,
         env_vars={
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
                 HTTP_PORT_NUMBER_VERIF
