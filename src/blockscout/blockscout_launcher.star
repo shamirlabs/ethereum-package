@@ -7,8 +7,9 @@ IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
 
+
 HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 4000
+HTTP_PORT_NUMBER = 80
 HTTP_PORT_NUMBER_VERIF = 8050
 
 BLOCKSCOUT_MIN_CPU = 100
@@ -20,6 +21,7 @@ BLOCKSCOUT_VERIF_MIN_CPU = 10
 BLOCKSCOUT_VERIF_MAX_CPU = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
+
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -74,6 +76,7 @@ def launch_blockscout(plan, el_client_contexts, persistent):
 
 
 def get_config_verif():
+
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_USED_PORTS,
@@ -102,6 +105,7 @@ def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT,
         ports=USED_PORTS,
+        public_ports=USED_PORTS,
         cmd=[
             "/bin/sh",
             "-c",
@@ -129,3 +133,4 @@ def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
     )
+

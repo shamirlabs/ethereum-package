@@ -382,6 +382,13 @@ def run(plan, args={}):
                 persistent,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
+        elif additional_service == "blockscout":
+            plan.print("Launching blockscout")
+            blockscout.launch_blockscout(
+                plan,
+                all_el_client_contexts,
+            )
+            plan.print("Successfully launched dora")                
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
