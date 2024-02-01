@@ -79,6 +79,7 @@ def input_parser(plan, input_args):
     result["assertoor_params"] = get_default_assertoor_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
+    result["global_tolerations"] = []
 
     for attr in input_args:
         value = input_args[attr]
@@ -144,11 +145,15 @@ def input_parser(plan, input_args):
                 el_extra_params=participant["el_extra_params"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
+                el_tolerations=participant["el_tolerations"],
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
                 cl_client_volume_size=participant["cl_client_volume_size"],
                 cl_split_mode_enabled=participant["cl_split_mode_enabled"],
+                cl_tolerations=participant["cl_tolerations"],
+                tolerations=participant["tolerations"],
+                validator_tolerations=participant["validator_tolerations"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
@@ -232,6 +237,7 @@ def input_parser(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         assertoor_params=struct(
+            image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
             run_block_proposal_check=result["assertoor_params"][
                 "run_block_proposal_check"
@@ -269,6 +275,7 @@ def input_parser(plan, input_args):
             beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
             xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
         ),
+        global_tolerations=result["global_tolerations"],
     )
 
 
@@ -455,6 +462,44 @@ def get_client_log_level_or_default(
     return log_level
 
 
+def get_client_tolerations(
+    specific_container_toleration, participant_tolerations, global_tolerations
+):
+    toleration_list = []
+    tolerations = []
+    tolerations = specific_container_toleration if specific_container_toleration else []
+    if not tolerations:
+        tolerations = participant_tolerations if participant_tolerations else []
+        if not tolerations:
+            tolerations = global_tolerations if global_tolerations else []
+
+    if tolerations != []:
+        for toleration_data in tolerations:
+            if toleration_data.get("toleration_seconds"):
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                        toleration_seconds=toleration_data.get("toleration_seconds"),
+                    )
+                )
+            # Gyani has to fix this in the future
+            # https://github.com/kurtosis-tech/kurtosis/issues/2093
+            else:
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                    )
+                )
+
+    return toleration_list
+
+
 def default_input_args():
     network_params = default_network_params()
     participants = [default_participant()]
@@ -468,6 +513,7 @@ def default_input_args():
         "xatu_sentry_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
+        "global_tolerations": [],
     }
 
 
@@ -500,11 +546,15 @@ def default_participant():
         "el_extra_params": [],
         "el_extra_env_vars": {},
         "el_extra_labels": {},
+        "el_tolerations": [],
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
         "cl_client_volume_size": 0,
         "cl_split_mode_enabled": False,
+        "cl_tolerations": [],
+        "validator_tolerations": [],
+        "tolerations": [],
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
@@ -566,6 +616,7 @@ def get_default_goomy_blob_params():
 
 def get_default_assertoor_params():
     return {
+        "image": "",
         "run_stability_check": True,
         "run_block_proposal_check": True,
         "run_lifecycle_test": False,

@@ -63,6 +63,7 @@ def run(plan, args={}):
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
     xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
+    global_tolerations = args_with_right_defaults.global_tolerations
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -71,7 +72,6 @@ def run(plan, args={}):
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
     prometheus_additional_metrics_jobs = []
-
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
@@ -97,6 +97,7 @@ def run(plan, args={}):
         jwt_file,
         persistent,
         xatu_sentry_params,
+        global_tolerations,
         parallel_keystore_generation,
     )
 
@@ -340,6 +341,12 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Successfully launched beacon metrics gazer")
+        elif additional_service == "blockscout":
+            plan.print("Launching blockscout")
+            blockscout_sc_verif_url = blockscout.launch_blockscout(
+                plan, all_el_client_contexts, persistent
+            )
+            plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
@@ -396,6 +403,7 @@ def run(plan, args={}):
                 assertoor_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
+                network_params,
                 assertoor_params,
             )
             plan.print("Successfully launched assertoor")
@@ -454,8 +462,12 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
+
     output = struct(
         grafana_info=grafana_info,
+        blockscout_sc_verif_url=None
+        if ("blockscout" in args_with_right_defaults.additional_services) == False
+        else blockscout_sc_verif_url,
         all_participants=all_participants,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
