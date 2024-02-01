@@ -142,7 +142,7 @@ def launch(
     )
 
     cl_client_name = service_name.split("-")[3]
-    public_ports = int(service_name.split("-")[1]) == 2
+    public_ports = int(service_name.split("-")[1]) == 1
 
     config = get_config(
         plan,

@@ -178,7 +178,7 @@ def launch(
         if int(cl_volume_size) > 0
         else constants.VOLUME_SIZE[network_name]["nimbus_volume_size"]
     )
-    public_ports = int(service_name.split("-")[1]) == 2
+    public_ports = int(service_name.split("-")[1]) == 1
 
     beacon_config = get_beacon_config(
         plan,

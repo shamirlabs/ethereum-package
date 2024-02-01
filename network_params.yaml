@@ -3,5 +3,5 @@ participants:
     cl_client_type: lighthouse
   - el_client_type: geth
     cl_client_type: nimbus
-additional_services: []
+additional_services: ["blockscout"]
 mev_type: null
