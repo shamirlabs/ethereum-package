@@ -50,6 +50,10 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:master-minimal",
 }
 
+DEFAULT_W3S_IMAGES = {
+    "consensys": "consensys/web3signer:latest",
+}
+
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
@@ -214,7 +218,15 @@ def input_parser(plan, input_args):
                 vc_extra_params=participant["vc_extra_params"],
                 vc_extra_env_vars=participant["vc_extra_env_vars"],
                 vc_extra_labels=participant["vc_extra_labels"],
-                builder_network_params=participant["builder_network_params"],
+                w3s_enabled=participant["w3s_enabled"],
+                w3s_type=participant["w3s_type"],
+                w3s_image=participant["w3s_image"],
+                w3s_log_level=participant["w3s_log_level"],
+                w3s_tolerations=participant["w3s_tolerations"],
+                w3s_extra_env_vars=participant["w3s_extra_env_vars"],
+                w3s_extra_params=participant["w3s_extra_params"],
+                w3s_extra_labels=participant["w3s_extra_labels"],
+                builder_network_params=participant["builder_network_params"],                
                 el_min_cpu=participant["el_min_cpu"],
                 el_max_cpu=participant["el_max_cpu"],
                 el_min_mem=participant["el_min_mem"],
@@ -227,6 +239,10 @@ def input_parser(plan, input_args):
                 vc_max_cpu=participant["vc_max_cpu"],
                 vc_min_mem=participant["vc_min_mem"],
                 vc_max_mem=participant["vc_max_mem"],
+                w3s_min_cpu=participant["w3s_min_cpu"],
+                w3s_max_cpu=participant["w3s_max_cpu"],
+                w3s_min_mem=participant["w3s_min_mem"],
+                w3s_max_mem=participant["w3s_max_mem"],
                 validator_count=participant["validator_count"],
                 tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
@@ -389,6 +405,7 @@ def parse_network_params(plan, input_args):
         el_type = participant["el_type"]
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
+        w3s_type = participant["w3s_type"]
 
         if (
             cl_type in (constants.CL_TYPE.nimbus)
@@ -483,6 +500,10 @@ def parse_network_params(plan, input_args):
                 )
             participant["vc_image"] = default_image
 
+        w3s_image = participant["w3s_image"]
+        if w3s_image == "":
+            participant["w3s_image"] = DEFAULT_W3S_IMAGES.get(w3s_type, "")
+
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
             participant["snooper_enabled"] = result["snooper_enabled"]
@@ -526,6 +547,9 @@ def parse_network_params(plan, input_args):
 
         vc_extra_params = participant.get("vc_extra_params", [])
         participant["vc_extra_params"] = vc_extra_params
+        
+        w3s_extra_params = participant.get("w3s_extra_params", [])
+        participant["w3s_extra_params"] = w3s_extra_params
 
         total_participant_count += participant["count"]
 
@@ -763,6 +787,18 @@ def default_participant():
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
         "vc_max_mem": 0,
+        "w3s_enabled": None,
+        "w3s_type": "consensys",
+        "w3s_image": "",
+        "w3s_log_level": "",
+        "w3s_extra_env_vars": {},
+        "w3s_extra_labels": {},
+        "w3s_extra_params": [],
+        "w3s_tolerations": [],
+        "w3s_min_cpu": 0,
+        "w3s_max_cpu": 0,
+        "w3s_min_mem": 0,
+        "w3s_max_mem": 0,
         "validator_count": None,
         "node_selectors": {},
         "tolerations": [],

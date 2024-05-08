@@ -327,6 +327,10 @@ participants:
   # Whether to use a separate validator client attached to the CL client.
   # Defaults to false for clients that can run both in one process (Teku, Nimbus)
   use_separate_vc: false
+  
+  # Wether the remote signer should be used
+  # Defaults to false
+  w3s_enabled: false
 
 # VC (Validator Client) Specific flags
   # The type of validator client that should be used
@@ -387,6 +391,48 @@ participants:
   # network parameter num_validator_keys_per_node
   validator_count: null
 
+#W3S (Web3Signer / Remote Signer) Specific flags
+  # The type of validator client that should be used
+  # Defaults to: "consensys"
+  w3s_type: ""
+
+  # The Docker image that should be used for the separate validator client
+  # Defaults to: "consensys/web3signer:latest"
+  w3s_image: ""
+
+  # The log level string that this participant's W3S client should log at
+  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client
+  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+  # over a specific participant's logging
+  w3s_log_level: ""
+
+  # A list of optional extra env_vars the w3s container should spin up with
+  w3s_extra_env_vars: {}
+
+  # A list of optional extra labels that will be passed to the W3S client validator container.
+  # Example; w3s_extra_labels: {"ethereum-package.partition": "1"}
+  w3s_extra_labels: {}
+
+  # A list of tolerations that will be passed to the validator container
+  # Only works with Kubernetes
+  # Example: el_tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  #   toleration_seconds: 3600
+  # Defaults to empty
+  w3s_tolerations: []
+
+  # Resource management for w3s containers
+  # CPU is milicores
+  # RAM is in MB
+  # Defaults are set per client
+  w3s_min_cpu: 0
+  w3s_max_cpu: 0
+  w3s_min_mem: 0
+  w3s_max_mem: 0
+    
 #Participant specific flags
   # Node selector
   # Only works with Kubernetes

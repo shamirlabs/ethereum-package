@@ -23,6 +23,7 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+w3s = import_module("./w3s/w3s_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 
@@ -191,6 +192,7 @@ def launch_participant_network(
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     all_vc_contexts = []
+    all_w3s_contexts = []
     all_snooper_beacon_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
@@ -204,6 +206,7 @@ def launch_participant_network(
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
+        w3s_type = participant.w3s_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
@@ -280,12 +283,17 @@ def launch_participant_network(
         plan.print(
             "Using separate validator client for participant #{0}".format(index_str)
         )
-
+        plan.print(participant)
+        
         vc_keystores = None
         if participant.validator_count != 0:
-            vc_keystores = preregistered_validator_keys_for_nodes[index]
+            if participant.w3s_enabled:
+                w3s_keystores = preregistered_validator_keys_for_nodes[index]
+            else:    
+                vc_keystores = preregistered_validator_keys_for_nodes[index]
 
         vc_context = None
+        w3s_context = None
         snooper_beacon_context = None
 
         if participant.snooper_enabled:
@@ -304,12 +312,46 @@ def launch_participant_network(
                 )
             )
         all_snooper_beacon_contexts.append(snooper_beacon_context)
+        
         full_name = (
             "{0}-{1}-{2}".format(index_str, el_type, cl_type) + "-{0}".format(vc_type)
             if participant.cl_type != participant.vc_type
             else "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         )
 
+        if participant.w3s_enabled:
+            w3s_context = w3s.launch(
+                plan=plan,
+                launcher=w3s.new_w3s_launcher(el_cl_genesis_data=el_cl_data),
+                keymanager_file=keymanager_file,
+                service_name="w3s-{0}-{1}-{2}".format(index_str, w3s_type, vc_type),
+                w3s_type=w3s_type,
+                image=participant.w3s_image,
+                participant_log_level=participant.w3s_log_level,
+                global_log_level=global_log_level,
+                cl_context=cl_context,
+                full_name="{0}-w3s".format(full_name),
+                node_keystore_files=w3s_keystores,
+                w3s_min_cpu=participant.w3s_min_cpu,
+                w3s_max_cpu=participant.w3s_max_cpu,
+                w3s_min_mem=participant.w3s_min_mem,
+                w3s_max_mem=participant.w3s_max_mem,
+                extra_params=participant.w3s_extra_params,            
+                extra_env_vars=participant.w3s_extra_env_vars,
+                extra_labels=participant.w3s_extra_labels,
+                prysm_password_relative_filepath=prysm_password_relative_filepath,
+                prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+                w3s_tolerations=participant.w3s_tolerations,
+                participant_tolerations=participant.tolerations,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                keymanager_enabled=participant.keymanager_enabled,
+                preset=network_params.preset,
+                network=network_params.network,
+                electra_fork_epoch=network_params.electra_fork_epoch,
+            )
+
+            all_w3s_contexts.append(w3s_context)
         vc_context = vc.launch(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -342,8 +384,10 @@ def launch_participant_network(
             preset=network_params.preset,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
+            w3s_context=w3s_context
         )
         all_vc_contexts.append(vc_context)
+
 
         if vc_context and vc_context.metrics_info:
             vc_context.metrics_info["config"] = participant.prometheus_config
@@ -354,12 +398,14 @@ def launch_participant_network(
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
+        w3s_type = participant.w3s_type
         snooper_engine_context = None
         snooper_beacon_context = None
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
         vc_context = all_vc_contexts[index]
+        w3s_context = all_w3s_contexts[index]
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -380,9 +426,11 @@ def launch_participant_network(
             el_type,
             cl_type,
             vc_type,
+            w3s_type,
             el_context,
             cl_context,
             vc_context,
+            w3s_context,
             snooper_engine_context,
             snooper_beacon_context,
             ethereum_metrics_exporter_context,

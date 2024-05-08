@@ -27,23 +27,14 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    w3s_context
 ):
-    validator_keys_dirpath = shared_utils.path_join(
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        node_keystore_files.prysm_relative_dirpath,
-    )
-    validator_secrets_dirpath = shared_utils.path_join(
-        PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        prysm_password_relative_filepath,
-    )
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--wallet-dir=" + validator_keys_dirpath,
-        "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -52,6 +43,30 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
     ]
+
+    if w3s_context == None: 
+        validator_keys_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.prysm_relative_dirpath,
+        )
+        validator_secrets_dirpath = shared_utils.path_join(
+            PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
+            prysm_password_relative_filepath,
+        )
+        files = {
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+            PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
+        }
+        cmd.append("--wallet-dir=" + validator_keys_dirpath)
+        cmd.append("--wallet-password-file=" + validator_secrets_dirpath)
+    else:
+        files ={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        }
+        cmd.append("--validators-external-signer-public-keys={0}/api/v1/eth2/publicKeys".format(w3s_context.ports.url))
+        cmd.append("--validators-external-signer-url={0}".format(w3s_context.ports.url))
+    
 
     keymanager_api_cmd = [
         "--rpc",
@@ -72,11 +87,8 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-        PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
-    }
+
+
 
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)

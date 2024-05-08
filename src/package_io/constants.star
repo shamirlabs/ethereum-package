@@ -27,6 +27,10 @@ VC_TYPE = struct(
     teku="teku",
 )
 
+W3S_TYPE = struct(
+    consensys="consensys",
+)
+
 GLOBAL_LOG_LEVEL = struct(
     info="info",
     error="error",
@@ -39,6 +43,7 @@ CLIENT_TYPES = struct(
     el="execution",
     cl="beacon",
     validator="validator",
+    w3s="w3s",
 )
 
 VALIDATING_REWARDS_ACCOUNT = "0x8943545177806ED17B9F23F0a21ee5948eCaa776"

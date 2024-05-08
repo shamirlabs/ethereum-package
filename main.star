@@ -147,12 +147,14 @@ def run(plan, args={}):
     all_el_contexts = []
     all_cl_contexts = []
     all_vc_contexts = []
+    all_w3s_contexts = []
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
+        all_w3s_contexts.append(participant.w3s_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )

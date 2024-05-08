@@ -49,8 +49,10 @@ def launch(
     preset,
     network,  # TODO: remove when deneb rebase is done
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
+    w3s_context,
 ):
-    if node_keystore_files == None:
+    
+    if node_keystore_files == None and w3s_context == None:
         return None
 
     tolerations = input_parser.get_client_tolerations(
@@ -94,6 +96,7 @@ def launch(
             keymanager_enabled=keymanager_enabled,
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
+            w3s_context=w3s_context,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
@@ -160,6 +163,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            w3s_context=w3s_context,
         )
     elif vc_type == constants.VC_TYPE.prysm:
         config = prysm.get_config(
@@ -183,6 +187,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            w3s_context=w3s_context
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
