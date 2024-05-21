@@ -2,7 +2,7 @@ participants:
 # EL
   - el_type: geth
 # CL
-    cl_type: prysm
+    cl_type: lighthouse
     use_separate_vc: true
 # W3S
     w3s_enabled: true
@@ -19,7 +19,7 @@ participants:
     blobber_enabled: false
     blobber_extra_params: []
     builder_network_params: null
-    keymanager_enabled: false
+    keymanager_enabled: true
 network_params:
   network: kurtosis
   network_id: "3151908"
@@ -43,12 +43,8 @@ network_params:
   eip7594_fork_version: "0x70000038"
   network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
 additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
   - dora
-  - prometheus_grafana
+  - blockscout
 tx_spammer_params:
   tx_spammer_extra_args: []
 goomy_blob_params:

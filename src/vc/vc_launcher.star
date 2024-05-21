@@ -74,6 +74,7 @@ def launch(
     vc_max_mem = int(vc_max_mem) if int(vc_max_mem) > 0 else MAX_MEMORY
 
     if vc_type == constants.VC_TYPE.lighthouse:
+ 
         config = lighthouse.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
@@ -97,7 +98,10 @@ def launch(
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
             w3s_context=w3s_context,
+            plan=plan,
+            keymanager_file=keymanager_file,
         )
+
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
@@ -121,6 +125,7 @@ def launch(
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
             preset=preset,
+            w3s_context=w3s_context,
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
@@ -143,6 +148,8 @@ def launch(
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
         )
+
+ 
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
@@ -195,6 +202,15 @@ def launch(
         fail("Unsupported vc_type: {0}".format(vc_type))
 
     validator_service = plan.add_service(service_name, config)
+
+    if vc_type == constants.VC_TYPE.lighthouse:
+
+        plan.print(w3s_context.service_ports["w3s-http"].url)
+        exec_recipe = ExecRecipe(
+            command = ["cat", "/root/.lighthouse/custom/validators/api-token.txt"],
+        )
+        token = plan.exec(service_name=validator_service.name, recipe=exec_recipe)
+        lighthouse.import_w3s_keys(plan, w3s_context, validator_service, token["output"] )
 
     validator_metrics_port = validator_service.ports[
         vc_shared.VALIDATOR_CLIENT_METRICS_PORT_ID

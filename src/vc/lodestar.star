@@ -34,20 +34,15 @@ def get_config(
     node_selectors,
     keymanager_enabled,
     preset,
+    w3s_context,
 ):
+
+
+        
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    validator_keys_dirpath = shared_utils.path_join(
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        node_keystore_files.raw_keys_relative_dirpath,
-    )
-
-    validator_secrets_dirpath = shared_utils.path_join(
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        node_keystore_files.raw_secrets_relative_dirpath,
-    )
 
     cmd = [
         "validator",
@@ -56,8 +51,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beaconNodes=" + beacon_http_url,
-        "--keystoresDir=" + validator_keys_dirpath,
-        "--secretsDir=" + validator_secrets_dirpath,
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -81,10 +74,39 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-    }
+
+    if w3s_context == None: 
+        validator_keys_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.raw_keys_relative_dirpath,
+        )
+
+        validator_secrets_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.raw_secrets_relative_dirpath,
+        )
+
+        files = {
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        }
+
+        cmd.extend(
+            [
+                "--keystoresDir=" + validator_keys_dirpath,
+                "--secretsDir=" + validator_secrets_dirpath,
+            ]
+        )
+    else: 
+        files ={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        }
+        cmd.extend(
+            [
+                "--externalSigner.url={0}".format(w3s_context.ports.url),
+                "--externalSigner.fetch",
+            ]
+        )
 
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)

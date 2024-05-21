@@ -21,7 +21,8 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
-    keymanager_enabled
+    keymanager_enabled,
+    plan
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -36,8 +37,6 @@ def get_config(
         )
 
     cmd = [
-        "--http-listen-port={0}".format(w3s_shared.W3S_HTTP_PORT_NUM),
-        "--http-host-allowlist=*",
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
         "--metrics-host=0.0.0.0",
@@ -50,28 +49,32 @@ def get_config(
         "--keystores-passwords-path=" + validator_secrets_dirpath,
         "--slashing-protection-enabled=false",
     ]
-
-    # todo keymanater metrics extra params
-    keymanager_api_cmd = [
-    ]
+    #TODO:SLASHING PROTECTION
 
     #if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
     #    cmd.extend([param for param in extra_params])
+    w3s_config = plan.upload_files(
+        src = "../../static_files/w3s-config/tls/web3signer",
+        name = "w3s_config_{}".format(full_name),
+    )
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
+        #"/tmp": w3s_config,
     }
+    
+    ports={}
 
-    ports = {}
-    ports.update(w3s_shared.W3S_HTTP_USED_PORTS)
     ports.update(w3s_shared.W3S_METRICS_USED_PORTS)
 
     if keymanager_enabled:
-        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
-        cmd.extend(keymanager_api_cmd)
-        ports.update(w3s_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+        cmd.insert(0,"--http-listen-port={0}".format(w3s_shared.W3S_HTTP_PORT_NUM))
+        cmd.insert(0,"--http-host-allowlist=*")
+
+    ports.update(w3s_shared.W3S_HTTP_USED_PORTS)
 
     return ServiceConfig(
         image=image,

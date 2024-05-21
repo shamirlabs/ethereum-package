@@ -465,11 +465,15 @@ def parse_network_params(plan, input_args):
                     constants.CL_TYPE.grandine,
                 )
                 and vc_type == ""
+                and participant["w3s_enabled"] = True
             ):
                 participant["use_separate_vc"] = False
             else:
                 participant["use_separate_vc"] = True
-
+        if not participant["use_separate_vc"] and participant["w3s_enabled"]:
+            fail(
+                "w3s needs use_separate_vc"
+            )            
         if vc_type == "":
             # Defaults to matching the chosen CL client
             vc_type = cl_type
@@ -511,6 +515,14 @@ def parse_network_params(plan, input_args):
         keymanager_enabled = participant["keymanager_enabled"]
         if keymanager_enabled == None:
             participant["keymanager_enabled"] = result["keymanager_enabled"]
+        if (
+            cl_type in (constants.CL_TYPE.lighthouse)
+            and (not participant["keymanager_enabled"])
+            and (participant["w3s_enabled"] = default_image)
+        ):
+            fail(
+                "To use the w3s lighthouse needs to have the keymanager enabled"
+            )
 
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
@@ -693,6 +705,7 @@ def default_input_args():
         "xatu_sentry_enabled": False,
         "global_tolerations": [],
         "global_node_selectors": {},
+        "w3s_enabled": False
         "keymanager_enabled": False,
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

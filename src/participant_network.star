@@ -288,6 +288,7 @@ def launch_participant_network(
         vc_keystores = None
         if participant.validator_count != 0:
             if participant.w3s_enabled:
+                vc_keystores = preregistered_validator_keys_for_nodes[index]
                 w3s_keystores = preregistered_validator_keys_for_nodes[index]
             else:    
                 vc_keystores = preregistered_validator_keys_for_nodes[index]

@@ -22,18 +22,10 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    w3s_context,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
-    if node_keystore_files != None:
-        validator_keys_dirpath = shared_utils.path_join(
-            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.teku_keys_relative_dirpath,
-        )
-        validator_secrets_dirpath = shared_utils.path_join(
-            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.teku_secrets_relative_dirpath,
-        )
 
     cmd = [
         "validator-client",
@@ -41,10 +33,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beacon-node-api-endpoint=" + beacon_http_url,
-        "--validator-keys={0}:{1}".format(
-            validator_keys_dirpath,
-            validator_secrets_dirpath,
-        ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti=" + full_name,
@@ -68,6 +56,42 @@ def get_config(
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
+
+
+    if w3s_context == None and node_keystore_files != None: 
+        validator_keys_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.teku_keys_relative_dirpath,
+        )
+
+        validator_secrets_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.teku_secrets_relative_dirpath,
+        )
+
+        files = {
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        }
+
+        cmd.extend(
+            [
+                "--validator-keys={0}:{1}".format(
+                    validator_keys_dirpath,
+                    validator_secrets_dirpath,
+                )
+            ]
+        )
+    else: 
+        files ={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        }
+        cmd.extend(
+            [
+                "--externalSigner.url={0}".format(w3s_context.ports.url),
+                "--externalSigner.fetch",
+            ]
+        )
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,

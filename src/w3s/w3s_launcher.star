@@ -76,6 +76,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            plan=plan,
         )
 
     else:
@@ -83,24 +84,12 @@ def launch(
 
     w3s_service = plan.add_service(service_name, config)
 
-    w3s_metrics_port = w3s_service.ports[w3s_shared.W3S_METRICS_PORT_ID]
-    
-    w3s_metrics_url = "{0}:{1}".format(
-        w3s_service.ip_address, w3s_metrics_port.number
-    )
-    w3s_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, w3s_shared.METRICS_PATH, w3s_metrics_url
-    )
-
-    w3s_http_ports = w3s_service.ports[w3s_shared.W3S_HTTP_PORT_ID]
-    
-
 
     return w3s_context.new_w3s_context(
         client_name=w3s_type,
         service_name=service_name,
-        metrics_info=w3s_node_metrics_info,
-        ports=w3s_http_ports
+        service_ports=w3s_service.ports,
+        node_keystore_files=node_keystore_files.files_artifact_uuid
     )
 
 
