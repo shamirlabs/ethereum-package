@@ -100,6 +100,7 @@ def launch_participant_network(
             network_params.churn_limit_quotient,
             network_params.ejection_balance,
             network_params.eth1_follow_distance,
+            network_params.epochs_per_eth1_voting_period,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
             network_params.eip7594_fork_epoch,

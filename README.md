@@ -518,6 +518,10 @@ network_params:
   # Defaults to 2048
   eth1_follow_distance: 2048
 
+  # Epoch per ETH1 voting period
+  # Defaults to 64
+  epochs_per_eth1_voting_period: 64
+
   # The number of epochs to wait validators to be able to withdraw
   # Defaults to 256 epochs ~27 hours
   min_validator_withdrawability_delay: 256
