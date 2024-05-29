@@ -27,6 +27,7 @@ USED_PORTS = {
 }
 
 
+
 def launch_dora(
     plan,
     config_template,
@@ -106,6 +107,11 @@ def get_config(
         IMAGE_NAME = (
             "ethpandaops/dora:master"  # TODO: revert to latest after next dora release
         )
+    public_ports = {
+        "http": shared_utils.new_port_spec(
+            8080, shared_utils.TCP_PROTOCOL
+        ),
+    }
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -122,6 +128,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        public_ports=public_ports,
     )
 
 

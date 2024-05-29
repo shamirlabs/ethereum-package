@@ -16,8 +16,8 @@ ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 300
-EXECUTION_MIN_MEMORY = 512
+EXECUTION_MIN_CPU = 600
+EXECUTION_MIN_MEMORY = 1024
 
 # Port IDs
 RPC_PORT_ID = "rpc"
@@ -248,7 +248,12 @@ def get_config(
             UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
                 discovery_port, shared_utils.UDP_PROTOCOL
             ),
+            
         }
+    if len(existing_el_clients)==0:
+        public_ports["rpc"] = PortSpec(number = 8545 , transport_protocol = "TCP", wait=None)
+        public_ports["ws"] = PortSpec(number = 8546 , transport_protocol = "TCP", wait=None)
+        
     used_ports = get_used_ports(discovery_port)
 
     cmd = [

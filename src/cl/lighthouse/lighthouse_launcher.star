@@ -27,8 +27,8 @@ BEACON_HTTP_PORT_NUM = 4000
 BEACON_METRICS_PORT_NUM = 5054
 
 # The min/max CPU/memory that the beacon node can use
-BEACON_MIN_CPU = 50
-BEACON_MIN_MEMORY = 256
+BEACON_MIN_CPU = 100
+BEACON_MIN_MEMORY = 512
 
 METRICS_PATH = "/metrics"
 
@@ -275,6 +275,8 @@ def get_beacon_config(
             ),
         }
     used_ports = get_used_ports(discovery_port)
+    if boot_cl_client_ctxs == None:
+        public_ports["http"] = PortSpec(number = 4000 , transport_protocol = "TCP", wait=None)
 
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
