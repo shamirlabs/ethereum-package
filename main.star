@@ -557,6 +557,8 @@ def run(plan, args={}):
                 all_el_contexts,
                 persistent,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
