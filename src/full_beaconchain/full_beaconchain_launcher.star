@@ -4,9 +4,6 @@ redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
 constants = import_module("../package_io/constants.star")
 IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:latest"
 
-CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS = "0x00000961Ef480Eb55e80D19ad83579A64c007002"
-CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS = "0x0000BBdDc7CE488642fb579F8B00f3a590007251"
-
 POSTGRES_PORT_ID = "postgres"
 POSTGRES_PORT_NUMBER = 5432
 POSTGRES_DB = "db"
@@ -391,8 +388,6 @@ def new_config_template_data(
     db_port,
     redis_url,
     frontend_port,
-    pectraWithdrawalRequestContractAddress,
-    pectraConsolidationRequestContractAddress,
 ):
     return {
         "CLNodeHost": cl_url,
@@ -408,6 +403,4 @@ def new_config_template_data(
         "DBPort": db_port,
         "RedisEndpoint": redis_url,
         "FrontendPort": frontend_port,
-        "pectraWithdrawalRequestContractAddress": CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS,
-        "pectraConsolidationRequestContractAddress": CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS,
     }
