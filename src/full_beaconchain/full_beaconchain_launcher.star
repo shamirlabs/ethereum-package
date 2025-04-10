@@ -170,8 +170,6 @@ def launch_full_beacon(
             min_memory=INIT_MIN_MEMORY,
             max_memory=INIT_MAX_MEMORY,
             node_selectors=node_selectors,
-            CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS=0x00000961Ef480Eb55e80D19ad83579A64c007002,
-            CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS=0x0000BBdDc7CE488642fb579F8B00f3a590007251,
         ),
     )
 
@@ -188,6 +186,10 @@ def launch_full_beacon(
                 "applyDbSchema",
             ]
         ),
+        env_vars={
+            "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
+            "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
+        },
     )
 
     plan.print("applying big table schema")
@@ -204,6 +206,10 @@ def launch_full_beacon(
                 "initBigtableSchema",
             ]
         ),
+        env_vars={
+            "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
+            "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
+        },
     )
 
     # Start the indexer
@@ -219,6 +225,8 @@ def launch_full_beacon(
             ],
             env_vars={
                 "INDEXER_ENABLED": "TRUE",
+                "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
+                "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
             },
             min_cpu=INDEXER_MIN_CPU,
             max_cpu=INDEXER_MAX_CPU,
