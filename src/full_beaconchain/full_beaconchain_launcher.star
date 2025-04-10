@@ -140,6 +140,8 @@ def launch_full_beacon(
         redis_url,
         FRONTEND_PORT_NUMBER,
     )
+    template_data["CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS"] = "0x00000961Ef480Eb55e80D19ad83579A64c007002"
+    template_data["CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS"] = "0x0000BBdDc7CE488642fb579F8B00f3a590007251"
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -186,10 +188,6 @@ def launch_full_beacon(
                 "applyDbSchema",
             ]
         ),
-        env_vars={
-            "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
-            "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
-        },
     )
 
     plan.print("applying big table schema")
@@ -206,10 +204,6 @@ def launch_full_beacon(
                 "initBigtableSchema",
             ]
         ),
-        env_vars={
-            "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
-            "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
-        },
     )
 
     # Start the indexer
@@ -225,8 +219,6 @@ def launch_full_beacon(
             ],
             env_vars={
                 "INDEXER_ENABLED": "TRUE",
-                "CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS": "0x00000961Ef480Eb55e80D19ad83579A64c007002",
-                "CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS": "0x0000BBdDc7CE488642fb579F8B00f3a590007251",
             },
             min_cpu=INDEXER_MIN_CPU,
             max_cpu=INDEXER_MAX_CPU,
