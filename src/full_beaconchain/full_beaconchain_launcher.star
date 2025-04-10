@@ -128,6 +128,9 @@ def launch_full_beacon(
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
+    CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS=0x00000961Ef480Eb55e80D19ad83579A64c007002
+    CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS=0x0000BBdDc7CE488642fb579F8B00f3a590007251
+
     template_data = new_config_template_data(
         cl_contexts[0].ip_addr,
         cl_contexts[0].http_port,
@@ -139,6 +142,8 @@ def launch_full_beacon(
         POSTGRES_PORT_NUMBER,
         redis_url,
         FRONTEND_PORT_NUMBER,
+        CHAIN_PECTRA_CONSOLIDATION_REQUEST_CONTRACT_ADDRESS,
+        CHAIN_PECTRA_WITHDRAWAL_REQUEST_CONTRACT_ADDRESS,
     )
 
     template_and_data = shared_utils.new_template_and_data(
